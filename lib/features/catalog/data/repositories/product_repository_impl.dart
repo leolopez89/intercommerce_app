@@ -36,13 +36,27 @@ class ProductRepositoryImpl implements ProductRepository {
 
   @override
   Future<Product> getProductDetail(int id) async {
-    // Implementar después con el datasource
-    throw UnimplementedError();
+    try {
+      final remoteProduct = await remoteDataSource.getProductDetail(id);
+
+      return remoteProduct.toEntity();
+    } catch (e) {
+      final localProducts = await localDataSource.getCachedProducts();
+
+      try {
+        final localProduct = localProducts.firstWhere((p) => p.id == id);
+
+        return localProduct.toEntity();
+      } catch (_) {
+        rethrow;
+      }
+    }
   }
 
   @override
   Future<List<Product>> searchProducts(String query) async {
-    // Implementar después con el datasource
-    throw UnimplementedError();
+    final models = await remoteDataSource.searchProducts(query);
+
+    return models.map((m) => m.toEntity()).toList();
   }
 }

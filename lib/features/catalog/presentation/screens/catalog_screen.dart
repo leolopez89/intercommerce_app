@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intercommerce_app/core/errors/failures.dart';
 import 'package:intercommerce_app/features/catalog/presentation/providers/catalog_provider.dart';
+import 'package:intercommerce_app/features/catalog/presentation/widgets/error_message.dart';
 import 'package:intercommerce_app/features/catalog/presentation/widgets/product_shimmer.dart';
 
 class CatalogScreen extends ConsumerWidget {
@@ -12,7 +14,16 @@ class CatalogScreen extends ConsumerWidget {
     final catalogAsync = ref.watch(catalogProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('InterCommerce'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('InterCommerce'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart),
+            onPressed: () => context.go('/cart'),
+          ),
+        ],
+      ),
       body: catalogAsync.when(
         data: (products) => GridView.builder(
           padding: const EdgeInsets.all(16),
@@ -42,8 +53,17 @@ class CatalogScreen extends ConsumerWidget {
           },
         ),
         loading: () => const ProductShimmer(),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, _) => ErrorMessage(
+          message: _mapErrorToMessage(err),
+          onRetry: () => ref.invalidate(catalogProvider),
+        ),
       ),
     );
+  }
+
+  String _mapErrorToMessage(Object error) {
+    if (error is ConnectionFailure) return 'Por favor, revisa tu conexión.';
+    if (error is ServerFailure) return 'El servidor está en mantenimiento.';
+    return 'Algo salió mal. Inténtalo de nuevo.';
   }
 }
