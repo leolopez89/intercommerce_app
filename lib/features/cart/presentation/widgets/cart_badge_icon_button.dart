@@ -11,8 +11,8 @@ class CartBadgeIconButton extends ConsumerWidget {
     final cartAsync = ref.watch(cartProvider);
 
     return cartAsync.when(
-      data: (items) {
-        final count = items.fold(0, (sum, item) => sum + item.quantity);
+      data: (state) {
+        final count = state.items.fold(0, (sum, item) => sum + item.quantity);
 
         return Stack(
           alignment: Alignment.center,

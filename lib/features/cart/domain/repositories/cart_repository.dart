@@ -5,4 +5,5 @@ abstract class CartRepository {
   Future<Either<Failure, Map<int, int>>> getCart();
   Future<Either<Failure, void>> addOrUpdateItem(int productId, int quantity);
   Future<Either<Failure, void>> removeItem(int productId);
+  Future<Either<Failure, void>> clearCart();
 }

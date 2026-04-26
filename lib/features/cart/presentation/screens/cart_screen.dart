@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intercommerce_app/features/cart/domain/entities/cart_summary.dart';
 import 'package:intercommerce_app/features/cart/presentation/providers/cart_provider.dart';
 import 'package:intercommerce_app/features/catalog/presentation/widgets/product_shimmer_card.dart';
 
@@ -10,20 +11,19 @@ class CartScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartAsync = ref.watch(cartProvider);
-    final totals = ref.watch(cartTotalsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Mi Carrito')),
       body: cartAsync.when(
-        data: (items) => items.isEmpty
+        data: (state) => state.items.isEmpty
             ? const Center(child: Text('El carrito está vacío'))
             : Column(
                 children: [
                   Expanded(
                     child: ListView.builder(
-                      itemCount: items.length,
+                      itemCount: state.items.length,
                       itemBuilder: (context, index) {
-                        final item = items[index];
+                        final item = state.items[index];
                         return ListTile(
                           leading: CachedNetworkImage(
                             imageUrl: item.product.thumbnail,
@@ -46,7 +46,8 @@ class CartScreen extends ConsumerWidget {
                       },
                     ),
                   ),
-                  _buildSummaryCard(context, totals),
+                  if (state.summary != null)
+                    _buildSummaryCard(context, state.summary!),
                 ],
               ),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -55,7 +56,7 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryCard(BuildContext context, Map<String, double> totals) {
+  Widget _buildSummaryCard(BuildContext context, CartSummary summary) {
     return Card(
       margin: const EdgeInsets.all(16),
       elevation: 4,
@@ -63,10 +64,10 @@ class CartScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            _RowTotal(label: 'Subtotal', value: totals['subtotal']!),
-            _RowTotal(label: 'IVA (19%)', value: totals['tax']!),
+            _RowTotal(label: 'Subtotal', value: summary.subtotal),
+            _RowTotal(label: 'IVA (19%)', value: summary.tax),
             const Divider(),
-            _RowTotal(label: 'Total', value: totals['total']!, isBold: true),
+            _RowTotal(label: 'Total', value: summary.total, isBold: true),
             const SizedBox(height: 16),
             ElevatedButton(
               style: ElevatedButton.styleFrom(

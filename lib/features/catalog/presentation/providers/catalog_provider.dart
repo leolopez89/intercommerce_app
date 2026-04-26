@@ -4,6 +4,7 @@ import 'package:intercommerce_app/core/di/injection_container.dart';
 import 'package:intercommerce_app/features/catalog/domain/entities/product.dart';
 import 'package:intercommerce_app/features/catalog/domain/usecases/get_products_usecase.dart';
 import 'package:intercommerce_app/features/catalog/domain/usecases/search_products_usecase.dart';
+import 'package:intercommerce_app/features/catalog/presentation/providers/state/catalog_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'catalog_provider.g.dart';
@@ -11,64 +12,53 @@ part 'catalog_provider.g.dart';
 @riverpod
 class Catalog extends _$Catalog {
   final int _limit = 10;
-
-  int _skip = 0;
-  bool _hasMore = true;
-  String _currentQuery = '';
-  bool _isFetching = false;
   Timer? _debounce;
 
   @override
-  Future<List<Product>> build() async {
-    return _fetchProducts();
-  }
+  Future<CatalogState> build() async {
+    ref.onDispose(() => _debounce?.cancel());
 
-  bool get isFetching => _isFetching;
-  bool get hasMore => _hasMore && _currentQuery.isEmpty;
-  String get currentQuery => _currentQuery;
-
-  Future<List<Product>> _fetchProducts() async {
-    _skip = 0;
-    _hasMore = true;
-    final getProducts = sl<GetProductsUseCase>();
-
-    if (_currentQuery.isNotEmpty) {
-      return (await sl<SearchProductsUseCase>().execute(
-        _currentQuery,
-      )).fold((failure) => throw failure, (products) => products);
-    }
-
-    return (await getProducts.execute(
-      limit: _limit,
-      skip: _skip,
-    )).fold((failure) => throw failure, (products) => products);
+    final products = await _fetchProducts(query: '', skip: 0);
+    return CatalogState(products: products);
   }
 
   Future<void> fetchNextPage() async {
-    if (_isFetching || !_hasMore || _currentQuery.isNotEmpty) return;
+    final currentState = state.value ?? CatalogState();
 
-    _isFetching = true;
-    final getProducts = sl<GetProductsUseCase>();
-    _skip += _limit;
-
-    final nextProducts = (await getProducts.execute(
-      limit: _limit,
-      skip: _skip,
-    )).fold((failure) => throw failure, (products) => products);
-
-    if (nextProducts.isEmpty) {
-      _hasMore = false;
-    } else {
-      state = AsyncData([...state.value ?? [], ...nextProducts]);
+    if (currentState.isFetching ||
+        !currentState.hasMore ||
+        currentState.query.isNotEmpty) {
+      return;
     }
 
-    _isFetching = false;
+    state = AsyncData(currentState.copyWith(isFetching: true));
+
+    final nextSkip = currentState.skip + _limit;
+
+    try {
+      final nextProducts = await _fetchProducts(
+        query: currentState.query,
+        skip: nextSkip,
+      );
+
+      state = AsyncData(
+        currentState.copyWith(
+          products: [...currentState.products, ...nextProducts],
+          skip: nextSkip,
+          isFetching: false,
+          hasMore: nextProducts.isNotEmpty,
+        ),
+      );
+    } catch (e, stack) {
+      state = AsyncError(e, stack);
+    }
   }
 
-  void search(String query) {
-    if (_currentQuery == query) return;
+  Future<void> search(String query) async {
+    final currentState = state.value ?? CatalogState();
 
-    _currentQuery = query;
+    if (currentState.query == query) return;
+
     _debounce?.cancel();
 
     if (query.isEmpty) {
@@ -77,8 +67,47 @@ class Catalog extends _$Catalog {
       return;
     }
 
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      ref.invalidateSelf();
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
+      state = AsyncData(
+        currentState.copyWith(
+          isFetching: true,
+          query: query,
+          products: [],
+          skip: 0,
+        ),
+      );
+
+      try {
+        final products = await _fetchProducts(query: query, skip: 0);
+
+        state = AsyncData(
+          CatalogState(
+            products: products,
+            query: query,
+            skip: 0,
+            isFetching: false,
+            hasMore: false,
+          ),
+        );
+      } catch (e, stack) {
+        state = AsyncError(e, stack);
+      }
     });
+  }
+
+  Future<List<Product>> _fetchProducts({
+    required String query,
+    required int skip,
+  }) async {
+    if (query.isNotEmpty == true) {
+      final result = (await sl<SearchProductsUseCase>().execute(query));
+      return result.fold((failure) => throw failure, (products) => products);
+    }
+
+    final result = (await sl<GetProductsUseCase>().execute(
+      limit: _limit,
+      skip: skip,
+    ));
+    return result.fold((failure) => throw failure, (products) => products);
   }
 }

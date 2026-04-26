@@ -22,15 +22,23 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-              _scrollController.position.maxScrollExtent * 0.8 &&
-          ref.read(catalogProvider.notifier).hasMore &&
-          !ref.read(catalogProvider.notifier).isFetching) {
+      final catalogState = ref.read(catalogProvider).value;
+
+      if (catalogState == null) return;
+
+      final thresholdReached =
+          _scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent * 0.8;
+
+      if (thresholdReached &&
+          catalogState.hasMore &&
+          !catalogState.isFetching &&
+          catalogState.query.isEmpty) {
         ref.read(catalogProvider.notifier).fetchNextPage();
       }
     });
 
-    final initialQuery = ref.read(catalogProvider.notifier).currentQuery;
+    final initialQuery = ref.read(catalogProvider).value?.query ?? '';
     _searchController = TextEditingController(text: initialQuery);
   }
 
@@ -43,7 +51,6 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
   @override
   Widget build(BuildContext context) {
     final catalogAsync = ref.watch(catalogProvider);
-    final hasMore = ref.watch(catalogProvider.notifier).hasMore;
 
     return Scaffold(
       body: CustomScrollView(
@@ -51,7 +58,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
         slivers: [
           _buildAppBar(),
           catalogAsync.when(
-            data: (products) => SliverPadding(
+            data: (catalogState) => SliverPadding(
               padding: const EdgeInsets.all(16),
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -61,8 +68,8 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                   crossAxisSpacing: 10,
                 ),
                 delegate: SliverChildBuilderDelegate((context, index) {
-                  return ProductCard(product: products[index]);
-                }, childCount: products.length),
+                  return ProductCard(product: catalogState.products[index]);
+                }, childCount: catalogState.products.length),
               ),
             ),
             loading: () => const SliverFillRemaining(child: ProductShimmer()),
@@ -75,7 +82,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
               ),
             ),
           ),
-          if (hasMore && catalogAsync.value != null)
+          if (catalogAsync.value?.hasMore == true)
             const PaginationShimmerRow(
               crossAxisSpacing: 10,
               horizontalPadding: 16,

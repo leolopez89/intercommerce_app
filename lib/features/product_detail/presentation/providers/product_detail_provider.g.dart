@@ -6,7 +6,7 @@ part of 'product_detail_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$productDetailHash() => r'48b52577bbf2684582ac19e6287c85d3bb8e0d89';
+String _$productDetailHash() => r'e11c494a64e4da6a2b94e5840e65dc02d9a7e80a';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -34,7 +34,7 @@ class _SystemHash {
 const productDetailProvider = ProductDetailFamily();
 
 /// See also [productDetail].
-class ProductDetailFamily extends Family<AsyncValue<Product>> {
+class ProductDetailFamily extends Family<AsyncValue<ProductDetailState>> {
   /// See also [productDetail].
   const ProductDetailFamily();
 
@@ -66,7 +66,8 @@ class ProductDetailFamily extends Family<AsyncValue<Product>> {
 }
 
 /// See also [productDetail].
-class ProductDetailProvider extends AutoDisposeFutureProvider<Product> {
+class ProductDetailProvider
+    extends AutoDisposeFutureProvider<ProductDetailState> {
   /// See also [productDetail].
   ProductDetailProvider(int id)
     : this._internal(
@@ -96,7 +97,7 @@ class ProductDetailProvider extends AutoDisposeFutureProvider<Product> {
 
   @override
   Override overrideWith(
-    FutureOr<Product> Function(ProductDetailRef provider) create,
+    FutureOr<ProductDetailState> Function(ProductDetailRef provider) create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -113,7 +114,7 @@ class ProductDetailProvider extends AutoDisposeFutureProvider<Product> {
   }
 
   @override
-  AutoDisposeFutureProviderElement<Product> createElement() {
+  AutoDisposeFutureProviderElement<ProductDetailState> createElement() {
     return _ProductDetailProviderElement(this);
   }
 
@@ -133,13 +134,13 @@ class ProductDetailProvider extends AutoDisposeFutureProvider<Product> {
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin ProductDetailRef on AutoDisposeFutureProviderRef<Product> {
+mixin ProductDetailRef on AutoDisposeFutureProviderRef<ProductDetailState> {
   /// The parameter `id` of this provider.
   int get id;
 }
 
 class _ProductDetailProviderElement
-    extends AutoDisposeFutureProviderElement<Product>
+    extends AutoDisposeFutureProviderElement<ProductDetailState>
     with ProductDetailRef {
   _ProductDetailProviderElement(super.provider);
 

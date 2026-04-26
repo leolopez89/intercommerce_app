@@ -45,4 +45,15 @@ class CartRepositoryImpl implements CartRepository {
       return Left(DatabaseFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, void>> clearCart() async {
+    try {
+      await localDataSource.clearCart();
+
+      return const Right(null);
+    } on Exception {
+      return Left(DatabaseFailure());
+    }
+  }
 }

@@ -5,6 +5,8 @@ import 'package:intercommerce_app/features/cart/data/datasources/cart_local_data
 import 'package:intercommerce_app/features/cart/data/repositories/cart_repository_impl.dart';
 import 'package:intercommerce_app/features/cart/domain/repositories/cart_repository.dart';
 import 'package:intercommerce_app/features/cart/domain/usecases/add_product_to_cart_usecase.dart';
+import 'package:intercommerce_app/features/cart/domain/usecases/calculate_cart_summary_usecase.dart';
+import 'package:intercommerce_app/features/cart/domain/usecases/clear_cart_items_usecase.dart';
 import 'package:intercommerce_app/features/cart/domain/usecases/get_cart_items_usecase.dart';
 import 'package:intercommerce_app/features/cart/domain/usecases/remove_product_from_cart_usecase.dart';
 import 'package:intercommerce_app/features/catalog/data/datasources/product_local_datasource.dart';
@@ -33,6 +35,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetCartItemsUseCase(sl()));
   sl.registerLazySingleton(() => AddProductToCartUseCase(sl()));
   sl.registerLazySingleton(() => RemoveProductFromCartUseCase(sl()));
+  sl.registerLazySingleton(() => ClearCartItemsUseCase(sl()));
+  sl.registerLazySingleton(() => CalculateCartSummaryUsecase());
 
   // Core
   sl.registerLazySingleton(
