@@ -6,6 +6,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'product_detail_provider.g.dart';
 
 @riverpod
-Future<Product> productDetail(ProductDetailRef ref, int id) {
-  return sl<GetProductDetailUseCase>().execute(id);
+Future<Product> productDetail(ProductDetailRef ref, int id) async {
+  return (await sl<GetProductDetailUseCase>().execute(
+    id,
+  )).fold((failure) => throw failure, (product) => product);
 }

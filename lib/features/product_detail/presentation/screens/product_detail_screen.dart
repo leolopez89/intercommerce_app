@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intercommerce_app/features/cart/presentation/providers/cart_provider.dart';
 import 'package:intercommerce_app/features/cart/presentation/widgets/cart_badge_icon_button.dart';
 import 'package:intercommerce_app/features/catalog/domain/entities/product.dart';
+import 'package:intercommerce_app/features/catalog/presentation/widgets/error_message.dart';
 import 'package:intercommerce_app/features/product_detail/presentation/providers/product_detail_provider.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
@@ -61,7 +62,11 @@ class ProductDetailScreen extends ConsumerWidget {
           ),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, _) => ErrorMessage(
+          error: err,
+          onRetry: () =>
+              ref.refresh(productDetailProvider(int.parse(productId))),
+        ),
       ),
       bottomNavigationBar: _buildAddToCartButton(context, ref, detailAsync),
     );

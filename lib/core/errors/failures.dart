@@ -16,3 +16,7 @@ class DatabaseFailure extends Failure {
     super.message = 'Error al acceder a la base de datos local',
   ]);
 }
+
+class NotFoundFailure extends Failure {
+  NotFoundFailure([super.message = 'Recurso no encontrado']);
+}

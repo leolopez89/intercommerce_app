@@ -1,3 +1,5 @@
+import 'package:dartz/dartz.dart';
+import 'package:intercommerce_app/core/errors/failures.dart';
 import 'package:intercommerce_app/features/catalog/domain/entities/product.dart';
 import 'package:intercommerce_app/features/catalog/domain/repositories/product_repository.dart';
 
@@ -6,7 +8,6 @@ class GetProductDetailUseCase {
 
   GetProductDetailUseCase(this.repository);
 
-  Future<Product> execute(int id) {
-    return repository.getProductDetail(id);
-  }
+  Future<Either<Failure, Product>> execute(int id) =>
+      repository.getProductDetail(id);
 }

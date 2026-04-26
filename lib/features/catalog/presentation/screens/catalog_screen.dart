@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intercommerce_app/core/errors/failures.dart';
 import 'package:intercommerce_app/features/cart/presentation/widgets/cart_badge_icon_button.dart';
 import 'package:intercommerce_app/features/catalog/domain/entities/product.dart';
 import 'package:intercommerce_app/features/catalog/presentation/providers/catalog_provider.dart';
+import 'package:intercommerce_app/features/catalog/presentation/widgets/error_message.dart';
 import 'package:intercommerce_app/features/catalog/presentation/widgets/pagination_shimmer_row.dart';
 import 'package:intercommerce_app/features/catalog/presentation/widgets/product_shimmer.dart';
 import 'package:intercommerce_app/features/catalog/presentation/widgets/product_shimmer_card.dart';
@@ -63,7 +63,10 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
             ),
             loading: () => const SliverFillRemaining(child: ProductShimmer()),
             error: (err, _) => SliverFillRemaining(
-              child: Center(child: Text(_mapErrorToMessage(err))),
+              child: ErrorMessage(
+                error: err,
+                onRetry: () => ref.read(catalogProvider.notifier).search(''),
+              ),
             ),
           ),
           if (hasMore && catalogAsync.value != null)
@@ -75,12 +78,6 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
         ],
       ),
     );
-  }
-
-  String _mapErrorToMessage(Object error) {
-    if (error is ConnectionFailure) return 'Por favor, revisa tu conexión.';
-    if (error is ServerFailure) return 'El servidor está en mantenimiento.';
-    return 'Algo salió mal. Inténtalo de nuevo.';
   }
 
   Widget _buildAppBar() {

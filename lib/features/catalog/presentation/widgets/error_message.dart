@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intercommerce_app/core/errors/failures.dart';
 
 class ErrorMessage extends StatelessWidget {
-  final String message;
+  final Object error;
   final VoidCallback onRetry;
 
-  const ErrorMessage({super.key, required this.message, required this.onRetry});
+  const ErrorMessage({super.key, required this.error, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -14,10 +15,16 @@ class ErrorMessage extends StatelessWidget {
         children: [
           const Icon(Icons.error_outline, color: Colors.red, size: 48),
           const SizedBox(height: 16),
-          Text(message, textAlign: TextAlign.center),
+          Text(_mapErrorToMessage(error), textAlign: TextAlign.center),
           ElevatedButton(onPressed: onRetry, child: const Text('Reintentar')),
         ],
       ),
     );
+  }
+
+  String _mapErrorToMessage(Object error) {
+    if (error is ConnectionFailure) return 'Por favor, revisa tu conexión.';
+    if (error is ServerFailure) return 'El servidor está en mantenimiento.';
+    return 'Algo salió mal. Inténtalo de nuevo.';
   }
 }

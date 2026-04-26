@@ -8,8 +8,9 @@ part 'catalog_provider.g.dart';
 
 @riverpod
 class Catalog extends _$Catalog {
-  int _skip = 0;
   final int _limit = 10;
+
+  int _skip = 0;
   bool _hasMore = true;
   String _currentQuery = '';
   bool _isFetching = false;
@@ -28,10 +29,15 @@ class Catalog extends _$Catalog {
     final getProducts = sl<GetProductsUseCase>();
 
     if (_currentQuery.isNotEmpty) {
-      return sl<SearchProductsUseCase>().execute(_currentQuery);
+      return (await sl<SearchProductsUseCase>().execute(
+        _currentQuery,
+      )).fold((failure) => throw failure, (products) => products);
     }
 
-    return getProducts.execute(limit: _limit, skip: _skip);
+    return (await getProducts.execute(
+      limit: _limit,
+      skip: _skip,
+    )).fold((failure) => throw failure, (products) => products);
   }
 
   Future<void> fetchNextPage() async {
@@ -41,7 +47,10 @@ class Catalog extends _$Catalog {
     final getProducts = sl<GetProductsUseCase>();
     _skip += _limit;
 
-    final nextProducts = await getProducts.execute(limit: _limit, skip: _skip);
+    final nextProducts = (await getProducts.execute(
+      limit: _limit,
+      skip: _skip,
+    )).fold((failure) => throw failure, (products) => products);
 
     if (nextProducts.isEmpty) {
       _hasMore = false;

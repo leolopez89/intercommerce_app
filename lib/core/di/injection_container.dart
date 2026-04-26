@@ -2,6 +2,11 @@ import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 import 'package:intercommerce_app/core/network/error_interceptor.dart';
 import 'package:intercommerce_app/features/cart/data/datasources/cart_local_datasource.dart';
+import 'package:intercommerce_app/features/cart/data/repositories/cart_repository_impl.dart';
+import 'package:intercommerce_app/features/cart/domain/repositories/cart_repository.dart';
+import 'package:intercommerce_app/features/cart/domain/usecases/add_product_to_cart_usecase.dart';
+import 'package:intercommerce_app/features/cart/domain/usecases/get_cart_items_usecase.dart';
+import 'package:intercommerce_app/features/cart/domain/usecases/remove_product_from_cart_usecase.dart';
 import 'package:intercommerce_app/features/catalog/data/datasources/product_local_datasource.dart';
 import 'package:intercommerce_app/features/catalog/data/datasources/product_local_datasource_sqlite.dart';
 import 'package:intercommerce_app/features/catalog/data/datasources/product_remote_datasource.dart';
@@ -25,6 +30,9 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetProductDetailUseCase(sl()));
   sl.registerLazySingleton(() => SearchProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetCartItemsUseCase(sl()));
+  sl.registerLazySingleton(() => AddProductToCartUseCase(sl()));
+  sl.registerLazySingleton(() => RemoveProductFromCartUseCase(sl()));
 
   // Core
   sl.registerLazySingleton(
@@ -49,6 +57,10 @@ Future<void> init() async {
   // Repositories
   sl.registerLazySingleton<ProductRepository>(
     () => ProductRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()),
+  );
+
+  sl.registerLazySingleton<CartRepository>(
+    () => CartRepositoryImpl(localDataSource: sl()),
   );
 }
 

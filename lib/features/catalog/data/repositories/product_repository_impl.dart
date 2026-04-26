@@ -1,3 +1,6 @@
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
+import 'package:intercommerce_app/core/errors/failures.dart';
 import 'package:intercommerce_app/features/catalog/data/datasources/product_local_datasource.dart';
 import 'package:intercommerce_app/features/catalog/data/datasources/product_remote_datasource.dart';
 import 'package:intercommerce_app/features/catalog/domain/entities/product.dart';
@@ -13,7 +16,10 @@ class ProductRepositoryImpl implements ProductRepository {
   });
 
   @override
-  Future<List<Product>> getProducts({int limit = 10, int skip = 0}) async {
+  Future<Either<Failure, List<Product>>> getProducts({
+    int limit = 10,
+    int skip = 0,
+  }) async {
     try {
       final remoteProducts = await remoteDataSource.getProducts(
         limit: limit,
@@ -22,44 +28,54 @@ class ProductRepositoryImpl implements ProductRepository {
 
       await localDataSource.cacheProducts(remoteProducts);
 
-      return remoteProducts.map((m) => m.toEntity()).toList();
-    } catch (e) {
+      return Right(remoteProducts.map((m) => m.toEntity()).toList());
+    } on DioException {
       final localProducts = await localDataSource.getCachedProducts(
         limit: limit,
         skip: skip,
       );
 
       if (localProducts.isNotEmpty) {
-        return localProducts.map((m) => m.toEntity()).toList();
+        return Right(localProducts.map((m) => m.toEntity()).toList());
       }
 
-      return [];
+      return Right([]);
+    } on Exception {
+      return Left(ServerFailure());
     }
   }
 
   @override
-  Future<Product> getProductDetail(int id) async {
+  Future<Either<Failure, Product>> getProductDetail(int id) async {
     try {
       final remoteProduct = await remoteDataSource.getProductDetail(id);
 
-      return remoteProduct.toEntity();
-    } catch (e) {
+      return Right(remoteProduct.toEntity());
+    } on DioException {
       final localProducts = await localDataSource.getCachedProducts();
 
       try {
         final localProduct = localProducts.firstWhere((p) => p.id == id);
 
-        return localProduct.toEntity();
+        return Right(localProduct.toEntity());
       } catch (_) {
-        rethrow;
+        return Left(NotFoundFailure());
       }
+    } on Exception {
+      return Left(ServerFailure());
     }
   }
 
   @override
-  Future<List<Product>> searchProducts(String query) async {
-    final models = await remoteDataSource.searchProducts(query);
+  Future<Either<Failure, List<Product>>> searchProducts(String query) async {
+    try {
+      final models = await remoteDataSource.searchProducts(query);
 
-    return models.map((m) => m.toEntity()).toList();
+      return Right(models.map((m) => m.toEntity()).toList());
+    } on DioException {
+      return Left(ConnectionFailure());
+    } on Exception {
+      return Left(ServerFailure());
+    }
   }
 }
