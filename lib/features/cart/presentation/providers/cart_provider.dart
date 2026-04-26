@@ -8,7 +8,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'cart_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class Cart extends _$Cart {
   late final CartLocalDataSource _localDataSource;
   late final ProductRepository _productRepository;
@@ -27,9 +27,7 @@ class Cart extends _$Cart {
       try {
         final product = await _productRepository.getProductDetail(entry.key);
         items.add(CartItem(product: product, quantity: entry.value));
-      } catch (_) {
-        // Manejar error si el producto ya no existe
-      }
+      } catch (_) {}
     }
     return items;
   }

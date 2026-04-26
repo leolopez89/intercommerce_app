@@ -1,4 +1,4 @@
-import '../entities/cart_item.dart';
+import 'package:intercommerce_app/features/cart/domain/entities/cart_item.dart';
 
 class CartCalculator {
   static const double taxRate = 0.19;

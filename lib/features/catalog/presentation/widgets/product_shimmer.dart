@@ -17,7 +17,7 @@ class ProductShimmer extends StatelessWidget {
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
         ),
-        itemCount: 6, // Mostramos 6 tarjetas de placeholder
+        itemCount: 6,
         itemBuilder: (_, _) => Container(
           decoration: BoxDecoration(
             color: Colors.white,

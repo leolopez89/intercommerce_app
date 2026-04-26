@@ -19,7 +19,7 @@ class InterCommerceApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'InterCommerce App',
       debugShowCheckedModeBanner: false,
-      routerConfig: appRouter, // El router que definimos antes
+      routerConfig: appRouter,
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
     );
   }

@@ -7,12 +7,14 @@ import 'package:intercommerce_app/features/catalog/data/datasources/product_loca
 import 'package:intercommerce_app/features/catalog/data/datasources/product_remote_datasource.dart';
 import 'package:intercommerce_app/features/catalog/data/repositories/product_repository_impl.dart';
 import 'package:intercommerce_app/features/catalog/domain/repositories/product_repository.dart';
+import 'package:intercommerce_app/features/catalog/domain/usecases/search_products_usecase.dart';
 import 'package:intercommerce_app/features/product_detail/domain/usecases/get_product_detail_usecase.dart';
 import 'package:intercommerce_app/features/catalog/domain/usecases/get_products_usecase.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-final sl = GetIt.instance; // sl = Service Locator
+// Service Locator
+final sl = GetIt.instance;
 
 Future<void> init() async {
   // Database
@@ -22,6 +24,7 @@ Future<void> init() async {
   // Use Cases
   sl.registerLazySingleton(() => GetProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetProductDetailUseCase(sl()));
+  sl.registerLazySingleton(() => SearchProductsUseCase(sl()));
 
   // Core
   sl.registerLazySingleton(

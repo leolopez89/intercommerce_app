@@ -24,13 +24,16 @@ class ProductRepositoryImpl implements ProductRepository {
 
       return remoteProducts.map((m) => m.toEntity()).toList();
     } catch (e) {
-      final localProducts = await localDataSource.getCachedProducts();
+      final localProducts = await localDataSource.getCachedProducts(
+        limit: limit,
+        skip: skip,
+      );
 
       if (localProducts.isNotEmpty) {
         return localProducts.map((m) => m.toEntity()).toList();
       }
 
-      rethrow;
+      return [];
     }
   }
 

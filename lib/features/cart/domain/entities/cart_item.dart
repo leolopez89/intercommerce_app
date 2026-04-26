@@ -1,4 +1,4 @@
-import '../../../catalog/domain/entities/product.dart';
+import 'package:intercommerce_app/features/catalog/domain/entities/product.dart';
 
 class CartItem {
   final Product product;

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intercommerce_app/features/cart/presentation/providers/cart_provider.dart';
+import 'package:intercommerce_app/features/cart/presentation/widgets/cart_badge_icon_button.dart';
 import 'package:intercommerce_app/features/catalog/domain/entities/product.dart';
 import 'package:intercommerce_app/features/product_detail/presentation/providers/product_detail_provider.dart';
 
@@ -15,7 +16,10 @@ class ProductDetailScreen extends ConsumerWidget {
     final detailAsync = ref.watch(productDetailProvider(int.parse(productId)));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detalle del Producto')),
+      appBar: AppBar(
+        title: const Text('Detalle del Producto'),
+        actions: [CartBadgeIconButton()],
+      ),
       body: detailAsync.when(
         data: (product) => SingleChildScrollView(
           child: Column(
@@ -69,7 +73,6 @@ class ProductDetailScreen extends ConsumerWidget {
     AsyncValue<Product> detailAsync,
   ) {
     return detailAsync.when(
-      // Solo cuando hay datos habilitamos el botón
       data: (product) => Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
@@ -92,7 +95,6 @@ class ProductDetailScreen extends ConsumerWidget {
           child: const Text('Agregar al carrito'),
         ),
       ),
-      // Mientras carga o hay error, podemos mostrar el botón deshabilitado o nada
       loading: () => const SizedBox.shrink(),
       error: (_, _) => const SizedBox.shrink(),
     );

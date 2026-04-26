@@ -20,8 +20,16 @@ class ProductLocalDataSourceSQLite implements ProductLocalDataSource {
   }
 
   @override
-  Future<List<ProductModel>> getCachedProducts() async {
-    final List<Map<String, dynamic>> maps = await database.query('products');
+  Future<List<ProductModel>> getCachedProducts({
+    int limit = 10,
+    int skip = 0,
+  }) async {
+    final List<Map<String, dynamic>> maps = await database.query(
+      'products',
+      limit: limit,
+      offset: skip,
+    );
+
     return maps.map((json) => ProductModel.fromJson(json)).toList();
   }
 }
