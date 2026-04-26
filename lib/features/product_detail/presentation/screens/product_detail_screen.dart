@@ -6,6 +6,7 @@ import 'package:intercommerce_app/features/cart/presentation/providers/cart_prov
 import 'package:intercommerce_app/features/cart/presentation/widgets/cart_badge_icon_button.dart';
 import 'package:intercommerce_app/features/catalog/domain/entities/product.dart';
 import 'package:intercommerce_app/features/catalog/presentation/widgets/error_message.dart';
+import 'package:intercommerce_app/features/catalog/presentation/widgets/product_shimmer_card.dart';
 import 'package:intercommerce_app/features/product_detail/presentation/providers/product_detail_provider.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
@@ -31,9 +32,9 @@ class ProductDetailScreen extends ConsumerWidget {
                 height: 300,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                placeholder: (context, url) =>
-                    Container(color: Colors.grey[200]),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
+                placeholder: (context, url) => const ProductShimmerCard(),
+                errorWidget: (context, url, error) =>
+                    const Icon(Icons.broken_image),
               ),
               Padding(
                 padding: const EdgeInsets.all(16.0),

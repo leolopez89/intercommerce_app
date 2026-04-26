@@ -52,15 +52,13 @@ class ProductRepositoryImpl implements ProductRepository {
 
       return Right(remoteProduct.toEntity());
     } on DioException {
-      final localProducts = await localDataSource.getCachedProducts();
+      final localProduct = await localDataSource.getCachedProductDetail(id);
 
-      try {
-        final localProduct = localProducts.firstWhere((p) => p.id == id);
-
+      if (localProduct != null) {
         return Right(localProduct.toEntity());
-      } catch (_) {
-        return Left(ConnectionFailure());
       }
+
+      return Left(ConnectionFailure());
     } on Exception {
       return Left(ServerFailure());
     }

@@ -19,11 +19,12 @@ class ProductCard extends StatelessWidget {
             Expanded(
               child: CachedNetworkImage(
                 imageUrl: product.thumbnail,
-                placeholder: (context, url) =>
-                    const ProductShimmerCard(), // Reutilizamos tu Shimmer
+                placeholder: (context, url) => const ProductShimmerCard(),
                 errorWidget: (context, url, error) =>
                     const Icon(Icons.broken_image),
                 fit: BoxFit.cover,
+                memCacheWidth: 250,
+                memCacheHeight: 250,
               ),
             ),
             Padding(

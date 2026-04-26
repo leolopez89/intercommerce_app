@@ -28,7 +28,7 @@ class CartScreen extends ConsumerWidget {
                           leading: CachedNetworkImage(
                             imageUrl: item.product.thumbnail,
                             placeholder: (context, url) =>
-                                const ProductShimmerCard(), // Reutilizamos tu Shimmer
+                                const ProductShimmerCard(),
                             errorWidget: (context, url, error) =>
                                 const Icon(Icons.broken_image),
                             fit: BoxFit.cover,
