@@ -1,0 +1,150 @@
+import 'package:dartz/dartz.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:intercommerce_app/core/errors/failures.dart';
+import 'package:intercommerce_app/features/catalog/domain/entities/product.dart';
+import 'package:intercommerce_app/features/catalog/domain/usecases/get_products_usecase.dart';
+import 'package:intercommerce_app/features/catalog/domain/usecases/search_products_usecase.dart';
+import 'package:intercommerce_app/features/catalog/presentation/providers/catalog_provider.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class MockGetProductsUseCase extends Mock implements GetProductsUseCase {}
+
+class MockSearchProductsUseCase extends Mock implements SearchProductsUseCase {}
+
+void main() {
+  late MockGetProductsUseCase mockGetProducts;
+  late MockSearchProductsUseCase mockSearchProducts;
+  late ProviderContainer container;
+
+  setUp(() async {
+    mockGetProducts = MockGetProductsUseCase();
+    mockSearchProducts = MockSearchProductsUseCase();
+
+    await GetIt.instance.reset();
+    final sl = GetIt.instance;
+
+    sl.registerFactory<GetProductsUseCase>(() => mockGetProducts);
+    sl.registerFactory<SearchProductsUseCase>(() => mockSearchProducts);
+
+    container = ProviderContainer();
+  });
+
+  tearDown(() => container.dispose());
+
+  final tProducts = [
+    Product(
+      id: 1,
+      title: 'Laptop',
+      price: 999.0,
+      description: 'A powerful laptop',
+      thumbnail: '',
+    ),
+  ];
+
+  group('CatalogNotifier Tests', () {
+    test(
+      'initial state should be AsyncData with the list of products',
+      () async {
+        when(
+          () => mockGetProducts(
+            limit: any(named: 'limit'),
+            skip: any(named: 'skip'),
+          ),
+        ).thenAnswer((_) async => Right(tProducts));
+
+        container.listen(catalogProvider, (_, _) {});
+
+        final state = await container.read(catalogProvider.future);
+
+        expect(state.products, tProducts);
+        expect(state.isFetching, false);
+      },
+    );
+
+    test(
+      'fetchNextPage should add new products to the existing state',
+      () async {
+        final nextProducts = [
+          Product(
+            id: 2,
+            title: 'Mouse',
+            price: 20.0,
+            description: '',
+            thumbnail: '',
+          ),
+        ];
+
+        when(
+          () => mockGetProducts(limit: 10, skip: 0),
+        ).thenAnswer((_) async => Right(tProducts));
+        when(
+          () => mockGetProducts(limit: 10, skip: 10),
+        ).thenAnswer((_) async => Right(nextProducts));
+
+        final notifier = container.read(catalogProvider.notifier);
+        await container.read(catalogProvider.future);
+
+        await notifier.fetchNextPage();
+
+        final finalState = container.read(catalogProvider).value;
+        expect(finalState!.products.length, 2);
+        expect(finalState.products, [...tProducts, ...nextProducts]);
+        expect(finalState.skip, 10);
+      },
+    );
+
+    test(
+      'search should update the products after the debounce delay',
+      () async {
+        when(
+          () => mockSearchProducts('Laptop'),
+        ).thenAnswer((_) async => Right(tProducts));
+        when(
+          () => mockGetProducts(
+            limit: any(named: 'limit'),
+            skip: any(named: 'skip'),
+          ),
+        ).thenAnswer((_) async => Right(tProducts));
+
+        final notifier = container.read(catalogProvider.notifier);
+        final listener = container.listen(catalogProvider, (_, _) {});
+        await container.read(catalogProvider.future);
+
+        notifier.search('Laptop');
+
+        expect(container.read(catalogProvider).value!.isFetching, false);
+
+        await Future.delayed(const Duration(milliseconds: 700));
+
+        final state = container.read(catalogProvider).value;
+        expect(state, isNotNull);
+        expect(state!.products, tProducts);
+        expect(state.query, 'Laptop');
+
+        listener.close();
+      },
+    );
+  });
+
+  group('CatalogNotifier Failure Tests', () {
+    test('Must emit AsyncError on failure', () async {
+      final tFailure = ServerFailure('Error de conexión');
+      when(
+        () => mockGetProducts(
+          limit: any(named: 'limit'),
+          skip: any(named: 'skip'),
+        ),
+      ).thenAnswer((_) async => Left(tFailure));
+
+      try {
+        await container.read(catalogProvider.future);
+      } catch (_) {}
+
+      final currentState = container.read(catalogProvider);
+      expect(currentState is AsyncError, true);
+      expect(currentState.error, tFailure);
+    });
+  });
+}

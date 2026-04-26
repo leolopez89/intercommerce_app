@@ -2,7 +2,7 @@ import '../entities/cart_item.dart';
 import '../entities/cart_summary.dart';
 
 class CalculateCartSummaryUsecase {
-  CartSummary execute(List<CartItem> items) {
+  CartSummary call(List<CartItem> items) {
     final subtotal = items.fold<double>(
       0.0,
       (sum, item) => sum + item.totalPrice,

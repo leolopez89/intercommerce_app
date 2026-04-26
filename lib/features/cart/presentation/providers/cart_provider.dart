@@ -16,7 +16,7 @@ part 'cart_provider.g.dart';
 class Cart extends _$Cart {
   @override
   Future<CartState> build() async {
-    final savedItems = (await sl<GetCartItemsUseCase>().execute()).fold(
+    final savedItems = (await sl<GetCartItemsUseCase>()()).fold(
       (failure) => throw failure,
       (items) => items,
     );
@@ -29,14 +29,14 @@ class Cart extends _$Cart {
     final producDetails = sl<GetProductDetailUseCase>();
 
     for (var entry in savedItems.entries) {
-      final product = (await producDetails.execute(
+      final product = (await producDetails(
         entry.key,
       )).fold((failure) => throw failure, (p) => p);
 
       itemsList.add(CartItem(product: product, quantity: entry.value));
     }
 
-    final summary = sl<CalculateCartSummaryUsecase>().execute(itemsList);
+    final summary = sl<CalculateCartSummaryUsecase>()(itemsList);
     return CartState(items: itemsList, summary: summary);
   }
 
@@ -56,12 +56,25 @@ class Cart extends _$Cart {
       items.add(CartItem(product: product, quantity: 1));
     }
 
-    state = AsyncData(currentState.copyWith(items: items, isLoading: false));
+    final summary = sl<CalculateCartSummaryUsecase>()(items);
 
-    (await sl<AddProductToCartUseCase>().execute(
-      product.id,
-      newQuantity,
-    )).fold((failure) => throw failure, (_) {});
+    final result = await sl<AddProductToCartUseCase>()(product.id, newQuantity);
+
+    result.fold(
+      (failure) {
+        state = AsyncError(failure, StackTrace.current);
+        throw failure;
+      },
+      (_) {
+        state = AsyncData(
+          currentState.copyWith(
+            items: items,
+            summary: summary,
+            isLoading: false,
+          ),
+        );
+      },
+    );
   }
 
   Future<void> removeItem(int productId) async {
@@ -72,18 +85,45 @@ class Cart extends _$Cart {
         .where((item) => item.product.id != productId)
         .toList();
 
-    state = AsyncData(
-      currentState.copyWith(items: itemsUpdated, isLoading: false),
-    );
+    final summary = itemsUpdated.isEmpty
+        ? null
+        : sl<CalculateCartSummaryUsecase>()(itemsUpdated);
 
-    final result = await sl<RemoveProductFromCartUseCase>().execute(productId);
-    result.fold((failure) => throw failure, (_) {});
+    final result = await sl<RemoveProductFromCartUseCase>()(productId);
+
+    result.fold(
+      (failure) {
+        state = AsyncError(failure, StackTrace.current);
+        throw failure;
+      },
+      (_) {
+        state = AsyncData(
+          currentState.copyWith(
+            items: itemsUpdated,
+            summary: summary,
+            isLoading: false,
+          ),
+        );
+      },
+    );
   }
 
   Future<void> clearCart() async {
-    state = const AsyncData(CartState(items: []));
+    final currentState = state.value ?? CartState(items: []);
+    state = AsyncData(currentState.copyWith(isLoading: true));
 
-    final result = await sl<ClearCartItemsUseCase>().execute();
-    result.fold((failure) => throw failure, (_) {});
+    final result = await sl<ClearCartItemsUseCase>()();
+
+    result.fold(
+      (failure) {
+        state = AsyncError(failure, StackTrace.current);
+        throw failure;
+      },
+      (_) {
+        state = const AsyncData(
+          CartState(items: [], summary: null, isLoading: false),
+        );
+      },
+    );
   }
 }

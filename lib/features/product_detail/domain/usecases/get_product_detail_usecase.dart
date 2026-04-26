@@ -8,6 +8,6 @@ class GetProductDetailUseCase {
 
   GetProductDetailUseCase(this.repository);
 
-  Future<Either<Failure, Product>> execute(int id) =>
+  Future<Either<Failure, Product>> call(int id) =>
       repository.getProductDetail(id);
 }

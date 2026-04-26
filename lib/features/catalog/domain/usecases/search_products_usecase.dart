@@ -7,6 +7,6 @@ class SearchProductsUseCase {
   final ProductRepository repository;
   SearchProductsUseCase(this.repository);
 
-  Future<Either<Failure, List<Product>>> execute(String query) =>
+  Future<Either<Failure, List<Product>>> call(String query) =>
       repository.searchProducts(query);
 }

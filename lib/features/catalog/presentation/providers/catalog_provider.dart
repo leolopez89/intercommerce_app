@@ -100,14 +100,11 @@ class Catalog extends _$Catalog {
     required int skip,
   }) async {
     if (query.isNotEmpty == true) {
-      final result = (await sl<SearchProductsUseCase>().execute(query));
+      final result = (await sl<SearchProductsUseCase>()(query));
       return result.fold((failure) => throw failure, (products) => products);
     }
 
-    final result = (await sl<GetProductsUseCase>().execute(
-      limit: _limit,
-      skip: skip,
-    ));
+    final result = (await sl<GetProductsUseCase>()(limit: _limit, skip: skip));
     return result.fold((failure) => throw failure, (products) => products);
   }
 }

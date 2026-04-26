@@ -7,7 +7,7 @@ class GetCartItemsUseCase {
 
   GetCartItemsUseCase(this.repository);
 
-  Future<Either<Failure, Map<int, int>>> execute() async {
+  Future<Either<Failure, Map<int, int>>> call() async {
     return await repository.getCart();
   }
 }

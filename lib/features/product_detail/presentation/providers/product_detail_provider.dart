@@ -7,7 +7,7 @@ part 'product_detail_provider.g.dart';
 
 @riverpod
 Future<ProductDetailState> productDetail(ProductDetailRef ref, int id) async {
-  final result = (await sl<GetProductDetailUseCase>().execute(id));
+  final result = (await sl<GetProductDetailUseCase>()(id));
 
   return result.fold(
     (failure) => throw failure,

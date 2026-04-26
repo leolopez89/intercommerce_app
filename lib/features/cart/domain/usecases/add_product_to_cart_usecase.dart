@@ -6,7 +6,7 @@ class AddProductToCartUseCase {
   final CartRepository repository;
   AddProductToCartUseCase(this.repository);
 
-  Future<Either<Failure, void>> execute(int productId, int quantity) async {
+  Future<Either<Failure, void>> call(int productId, int quantity) async {
     return await repository.addOrUpdateItem(productId, quantity);
   }
 }

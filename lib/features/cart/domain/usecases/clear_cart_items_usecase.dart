@@ -7,7 +7,7 @@ class ClearCartItemsUseCase {
 
   ClearCartItemsUseCase(this.repository);
 
-  Future<Either<Failure, void>> execute() async {
+  Future<Either<Failure, void>> call() async {
     return await repository.clearCart();
   }
 }
