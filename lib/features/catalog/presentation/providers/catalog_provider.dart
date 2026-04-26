@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:intercommerce_app/core/di/injection_container.dart';
 import 'package:intercommerce_app/features/catalog/domain/entities/product.dart';
 import 'package:intercommerce_app/features/catalog/domain/usecases/get_products_usecase.dart';
@@ -14,6 +16,7 @@ class Catalog extends _$Catalog {
   bool _hasMore = true;
   String _currentQuery = '';
   bool _isFetching = false;
+  Timer? _debounce;
 
   @override
   Future<List<Product>> build() async {
@@ -22,6 +25,7 @@ class Catalog extends _$Catalog {
 
   bool get isFetching => _isFetching;
   bool get hasMore => _hasMore && _currentQuery.isEmpty;
+  String get currentQuery => _currentQuery;
 
   Future<List<Product>> _fetchProducts() async {
     _skip = 0;
@@ -62,7 +66,19 @@ class Catalog extends _$Catalog {
   }
 
   void search(String query) {
+    if (_currentQuery == query) return;
+
     _currentQuery = query;
-    ref.invalidateSelf();
+    _debounce?.cancel();
+
+    if (query.isEmpty) {
+      ref.invalidateSelf();
+
+      return;
+    }
+
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      ref.invalidateSelf();
+    });
   }
 }

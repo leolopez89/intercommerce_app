@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intercommerce_app/features/cart/presentation/widgets/cart_badge_icon_button.dart';
-import 'package:intercommerce_app/features/catalog/domain/entities/product.dart';
 import 'package:intercommerce_app/features/catalog/presentation/providers/catalog_provider.dart';
 import 'package:intercommerce_app/features/catalog/presentation/widgets/error_message.dart';
 import 'package:intercommerce_app/features/catalog/presentation/widgets/pagination_shimmer_row.dart';
+import 'package:intercommerce_app/features/catalog/presentation/widgets/product_card.dart';
 import 'package:intercommerce_app/features/catalog/presentation/widgets/product_shimmer.dart';
-import 'package:intercommerce_app/features/catalog/presentation/widgets/product_shimmer_card.dart';
 
 class CatalogScreen extends ConsumerStatefulWidget {
   const CatalogScreen({super.key});
@@ -18,6 +16,7 @@ class CatalogScreen extends ConsumerStatefulWidget {
 
 class _CatalogScreenState extends ConsumerState<CatalogScreen> {
   final ScrollController _scrollController = ScrollController();
+  late TextEditingController _searchController;
 
   @override
   void initState() {
@@ -30,6 +29,15 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
         ref.read(catalogProvider.notifier).fetchNextPage();
       }
     });
+
+    final initialQuery = ref.read(catalogProvider.notifier).currentQuery;
+    _searchController = TextEditingController(text: initialQuery);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -53,10 +61,6 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                   crossAxisSpacing: 10,
                 ),
                 delegate: SliverChildBuilderDelegate((context, index) {
-                  if (index >= products.length) {
-                    return const ProductShimmerCard();
-                  }
-
                   return ProductCard(product: products[index]);
                 }, childCount: products.length),
               ),
@@ -65,7 +69,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
             error: (err, _) => SliverFillRemaining(
               child: ErrorMessage(
                 error: err,
-                onRetry: () => ref.read(catalogProvider.notifier).search(''),
+                onRetry: () => ref
+                    .read(catalogProvider.notifier)
+                    .search(_searchController.text),
               ),
             ),
           ),
@@ -90,35 +96,12 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: SearchBar(
+            controller: _searchController,
             hintText: 'Buscar productos...',
             onChanged: (value) =>
                 ref.read(catalogProvider.notifier).search(value),
             leading: const Icon(Icons.search),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class ProductCard extends StatelessWidget {
-  const ProductCard({super.key, required this.product});
-
-  final Product product;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => context.go('/product/${product.id}'),
-      child: Card(
-        child: Column(
-          children: [
-            Expanded(child: Image.network(product.thumbnail)),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(product.title, maxLines: 2),
-            ),
-          ],
         ),
       ),
     );

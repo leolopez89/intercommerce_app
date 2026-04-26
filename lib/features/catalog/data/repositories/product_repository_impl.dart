@@ -59,7 +59,7 @@ class ProductRepositoryImpl implements ProductRepository {
 
         return Right(localProduct.toEntity());
       } catch (_) {
-        return Left(NotFoundFailure());
+        return Left(ConnectionFailure());
       }
     } on Exception {
       return Left(ServerFailure());

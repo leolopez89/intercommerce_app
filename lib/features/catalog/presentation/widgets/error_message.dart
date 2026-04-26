@@ -25,6 +25,8 @@ class ErrorMessage extends StatelessWidget {
   String _mapErrorToMessage(Object error) {
     if (error is ConnectionFailure) return 'Por favor, revisa tu conexión.';
     if (error is ServerFailure) return 'El servidor está en mantenimiento.';
+    if (error is NotFoundFailure) return 'Producto no encontrado.';
+    if (error is DatabaseFailure) return 'Error en la base de datos.';
     return 'Algo salió mal. Inténtalo de nuevo.';
   }
 }

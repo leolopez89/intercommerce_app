@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intercommerce_app/features/cart/presentation/providers/cart_provider.dart';
+import 'package:intercommerce_app/features/catalog/presentation/widgets/product_shimmer_card.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
@@ -23,8 +25,13 @@ class CartScreen extends ConsumerWidget {
                       itemBuilder: (context, index) {
                         final item = items[index];
                         return ListTile(
-                          leading: Image.network(
-                            item.product.thumbnail,
+                          leading: CachedNetworkImage(
+                            imageUrl: item.product.thumbnail,
+                            placeholder: (context, url) =>
+                                const ProductShimmerCard(), // Reutilizamos tu Shimmer
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.broken_image),
+                            fit: BoxFit.cover,
                             width: 50,
                           ),
                           title: Text(item.product.title),
