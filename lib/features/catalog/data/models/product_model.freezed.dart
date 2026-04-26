@@ -26,6 +26,12 @@ mixin _$ProductModel {
   String get description => throw _privateConstructorUsedError;
   double get price => throw _privateConstructorUsedError;
   String get thumbnail => throw _privateConstructorUsedError;
+  String get category => throw _privateConstructorUsedError;
+  String get shippingInformation => throw _privateConstructorUsedError;
+  String get warrantyInformation => throw _privateConstructorUsedError;
+  String get returnPolicy => throw _privateConstructorUsedError;
+  String get availabilityStatus => throw _privateConstructorUsedError;
+  double get rating => throw _privateConstructorUsedError;
 
   /// Serializes this ProductModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -50,6 +56,12 @@ abstract class $ProductModelCopyWith<$Res> {
     String description,
     double price,
     String thumbnail,
+    String category,
+    String shippingInformation,
+    String warrantyInformation,
+    String returnPolicy,
+    String availabilityStatus,
+    double rating,
   });
 }
 
@@ -73,6 +85,12 @@ class _$ProductModelCopyWithImpl<$Res, $Val extends ProductModel>
     Object? description = null,
     Object? price = null,
     Object? thumbnail = null,
+    Object? category = null,
+    Object? shippingInformation = null,
+    Object? warrantyInformation = null,
+    Object? returnPolicy = null,
+    Object? availabilityStatus = null,
+    Object? rating = null,
   }) {
     return _then(
       _value.copyWith(
@@ -96,6 +114,30 @@ class _$ProductModelCopyWithImpl<$Res, $Val extends ProductModel>
                 ? _value.thumbnail
                 : thumbnail // ignore: cast_nullable_to_non_nullable
                       as String,
+            category: null == category
+                ? _value.category
+                : category // ignore: cast_nullable_to_non_nullable
+                      as String,
+            shippingInformation: null == shippingInformation
+                ? _value.shippingInformation
+                : shippingInformation // ignore: cast_nullable_to_non_nullable
+                      as String,
+            warrantyInformation: null == warrantyInformation
+                ? _value.warrantyInformation
+                : warrantyInformation // ignore: cast_nullable_to_non_nullable
+                      as String,
+            returnPolicy: null == returnPolicy
+                ? _value.returnPolicy
+                : returnPolicy // ignore: cast_nullable_to_non_nullable
+                      as String,
+            availabilityStatus: null == availabilityStatus
+                ? _value.availabilityStatus
+                : availabilityStatus // ignore: cast_nullable_to_non_nullable
+                      as String,
+            rating: null == rating
+                ? _value.rating
+                : rating // ignore: cast_nullable_to_non_nullable
+                      as double,
           )
           as $Val,
     );
@@ -117,6 +159,12 @@ abstract class _$$ProductModelImplCopyWith<$Res>
     String description,
     double price,
     String thumbnail,
+    String category,
+    String shippingInformation,
+    String warrantyInformation,
+    String returnPolicy,
+    String availabilityStatus,
+    double rating,
   });
 }
 
@@ -139,6 +187,12 @@ class __$$ProductModelImplCopyWithImpl<$Res>
     Object? description = null,
     Object? price = null,
     Object? thumbnail = null,
+    Object? category = null,
+    Object? shippingInformation = null,
+    Object? warrantyInformation = null,
+    Object? returnPolicy = null,
+    Object? availabilityStatus = null,
+    Object? rating = null,
   }) {
     return _then(
       _$ProductModelImpl(
@@ -162,6 +216,30 @@ class __$$ProductModelImplCopyWithImpl<$Res>
             ? _value.thumbnail
             : thumbnail // ignore: cast_nullable_to_non_nullable
                   as String,
+        category: null == category
+            ? _value.category
+            : category // ignore: cast_nullable_to_non_nullable
+                  as String,
+        shippingInformation: null == shippingInformation
+            ? _value.shippingInformation
+            : shippingInformation // ignore: cast_nullable_to_non_nullable
+                  as String,
+        warrantyInformation: null == warrantyInformation
+            ? _value.warrantyInformation
+            : warrantyInformation // ignore: cast_nullable_to_non_nullable
+                  as String,
+        returnPolicy: null == returnPolicy
+            ? _value.returnPolicy
+            : returnPolicy // ignore: cast_nullable_to_non_nullable
+                  as String,
+        availabilityStatus: null == availabilityStatus
+            ? _value.availabilityStatus
+            : availabilityStatus // ignore: cast_nullable_to_non_nullable
+                  as String,
+        rating: null == rating
+            ? _value.rating
+            : rating // ignore: cast_nullable_to_non_nullable
+                  as double,
       ),
     );
   }
@@ -176,6 +254,12 @@ class _$ProductModelImpl extends _ProductModel {
     required this.description,
     required this.price,
     required this.thumbnail,
+    required this.category,
+    required this.shippingInformation,
+    required this.warrantyInformation,
+    required this.returnPolicy,
+    required this.availabilityStatus,
+    required this.rating,
   }) : super._();
 
   factory _$ProductModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -191,10 +275,22 @@ class _$ProductModelImpl extends _ProductModel {
   final double price;
   @override
   final String thumbnail;
+  @override
+  final String category;
+  @override
+  final String shippingInformation;
+  @override
+  final String warrantyInformation;
+  @override
+  final String returnPolicy;
+  @override
+  final String availabilityStatus;
+  @override
+  final double rating;
 
   @override
   String toString() {
-    return 'ProductModel(id: $id, title: $title, description: $description, price: $price, thumbnail: $thumbnail)';
+    return 'ProductModel(id: $id, title: $title, description: $description, price: $price, thumbnail: $thumbnail, category: $category, shippingInformation: $shippingInformation, warrantyInformation: $warrantyInformation, returnPolicy: $returnPolicy, availabilityStatus: $availabilityStatus, rating: $rating)';
   }
 
   @override
@@ -208,13 +304,36 @@ class _$ProductModelImpl extends _ProductModel {
                 other.description == description) &&
             (identical(other.price, price) || other.price == price) &&
             (identical(other.thumbnail, thumbnail) ||
-                other.thumbnail == thumbnail));
+                other.thumbnail == thumbnail) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
+            (identical(other.shippingInformation, shippingInformation) ||
+                other.shippingInformation == shippingInformation) &&
+            (identical(other.warrantyInformation, warrantyInformation) ||
+                other.warrantyInformation == warrantyInformation) &&
+            (identical(other.returnPolicy, returnPolicy) ||
+                other.returnPolicy == returnPolicy) &&
+            (identical(other.availabilityStatus, availabilityStatus) ||
+                other.availabilityStatus == availabilityStatus) &&
+            (identical(other.rating, rating) || other.rating == rating));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, title, description, price, thumbnail);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    title,
+    description,
+    price,
+    thumbnail,
+    category,
+    shippingInformation,
+    warrantyInformation,
+    returnPolicy,
+    availabilityStatus,
+    rating,
+  );
 
   /// Create a copy of ProductModel
   /// with the given fields replaced by the non-null parameter values.
@@ -237,6 +356,12 @@ abstract class _ProductModel extends ProductModel {
     required final String description,
     required final double price,
     required final String thumbnail,
+    required final String category,
+    required final String shippingInformation,
+    required final String warrantyInformation,
+    required final String returnPolicy,
+    required final String availabilityStatus,
+    required final double rating,
   }) = _$ProductModelImpl;
   const _ProductModel._() : super._();
 
@@ -253,6 +378,18 @@ abstract class _ProductModel extends ProductModel {
   double get price;
   @override
   String get thumbnail;
+  @override
+  String get category;
+  @override
+  String get shippingInformation;
+  @override
+  String get warrantyInformation;
+  @override
+  String get returnPolicy;
+  @override
+  String get availabilityStatus;
+  @override
+  double get rating;
 
   /// Create a copy of ProductModel
   /// with the given fields replaced by the non-null parameter values.

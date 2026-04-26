@@ -59,6 +59,12 @@ void main() {
     price: 100.0,
     description: '',
     thumbnail: '',
+    category: '',
+    shippingInformation: '',
+    warrantyInformation: '',
+    returnPolicy: '',
+    availabilityStatus: '',
+    rating: 0,
   );
 
   group('CartNotifier & Summary Tests', () {
@@ -113,6 +119,47 @@ void main() {
 
         await notifier.addItem(tProduct);
         await notifier.removeItem(tProduct.id);
+
+        final state = container.read(cartProvider).value;
+
+        expect(state!.items, isEmpty);
+        expect(state.summary, isNull);
+      },
+    );
+
+    test('decrementItem must decrease quantity and update totals', () async {
+      when(
+        () => mockAddToCart(any(), any()),
+      ).thenAnswer((_) async => const Right(null));
+      final notifier = container.read(cartProvider.notifier);
+
+      await notifier.addItem(tProduct);
+      await notifier.addItem(tProduct);
+      await notifier.decrementItem(tProduct);
+
+      final state = container.read(cartProvider).value;
+
+      expect(state!.items.length, 1);
+      expect(state.items.first.quantity, 1);
+      expect(state.summary, isNotNull);
+      expect(state.summary!.subtotal, 100.0);
+      expect(state.summary!.tax, 19.0);
+      expect(state.summary!.total, 119.0);
+    });
+
+    test(
+      'decrementItem must remove the product when quantity reaches zero',
+      () async {
+        when(
+          () => mockAddToCart(any(), any()),
+        ).thenAnswer((_) async => const Right(null));
+        when(
+          () => mockRemoveProductFromCart(any()),
+        ).thenAnswer((_) async => const Right(null));
+        final notifier = container.read(cartProvider.notifier);
+
+        await notifier.addItem(tProduct);
+        await notifier.decrementItem(tProduct);
 
         final state = container.read(cartProvider).value;
 

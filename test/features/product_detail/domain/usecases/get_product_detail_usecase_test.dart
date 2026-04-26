@@ -24,6 +24,12 @@ void main() {
     description: 'Test description',
     price: 99.99,
     thumbnail: 'https://example.com/product.jpg',
+    category: '',
+    shippingInformation: '',
+    warrantyInformation: '',
+    returnPolicy: '',
+    availabilityStatus: '',
+    rating: 0,
   );
 
   test('should get product detail from repository successfully', () async {

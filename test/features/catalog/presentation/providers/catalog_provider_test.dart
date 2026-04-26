@@ -40,6 +40,12 @@ void main() {
       price: 999.0,
       description: 'A powerful laptop',
       thumbnail: '',
+      category: '',
+      shippingInformation: '',
+      warrantyInformation: '',
+      returnPolicy: '',
+      availabilityStatus: '',
+      rating: 0,
     ),
   ];
 
@@ -73,6 +79,12 @@ void main() {
             price: 20.0,
             description: '',
             thumbnail: '',
+            category: '',
+            shippingInformation: '',
+            warrantyInformation: '',
+            returnPolicy: '',
+            availabilityStatus: '',
+            rating: 0,
           ),
         ];
 

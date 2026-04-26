@@ -16,17 +16,17 @@ class ErrorMessage extends StatelessWidget {
           const Icon(Icons.error_outline, color: Colors.red, size: 48),
           const SizedBox(height: 16),
           Text(_mapErrorToMessage(error), textAlign: TextAlign.center),
-          ElevatedButton(onPressed: onRetry, child: const Text('Reintentar')),
+          ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
         ],
       ),
     );
   }
 
   String _mapErrorToMessage(Object error) {
-    if (error is ConnectionFailure) return 'Por favor, revisa tu conexión.';
-    if (error is ServerFailure) return 'El servidor está en mantenimiento.';
-    if (error is NotFoundFailure) return 'Producto no encontrado.';
-    if (error is DatabaseFailure) return 'Error en la base de datos.';
-    return 'Algo salió mal. Inténtalo de nuevo.';
+    if (error is ConnectionFailure) return 'Check your connection.';
+    if (error is ServerFailure) return 'The server is down for maintenance.';
+    if (error is NotFoundFailure) return 'Product not found.';
+    if (error is DatabaseFailure) return 'Database error.';
+    return 'Something went wrong. Please try again.';
   }
 }

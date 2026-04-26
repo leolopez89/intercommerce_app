@@ -25,6 +25,12 @@ void main() {
       description: 'A stylish shirt',
       price: 49.99,
       thumbnail: 'https://example.com/shirt.jpg',
+      category: '',
+      shippingInformation: '',
+      warrantyInformation: '',
+      returnPolicy: '',
+      availabilityStatus: '',
+      rating: 0,
     ),
     Product(
       id: 2,
@@ -32,6 +38,12 @@ void main() {
       description: 'A comfortable tee',
       price: 29.99,
       thumbnail: 'https://example.com/tshirt.jpg',
+      category: '',
+      shippingInformation: '',
+      warrantyInformation: '',
+      returnPolicy: '',
+      availabilityStatus: '',
+      rating: 0,
     ),
   ];
 

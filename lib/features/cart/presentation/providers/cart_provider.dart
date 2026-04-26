@@ -77,6 +77,73 @@ class Cart extends _$Cart {
     );
   }
 
+  Future<void> decrementItem(Product product) async {
+    final currentState = state.value ?? CartState(items: []);
+    state = AsyncData(currentState.copyWith(isLoading: true));
+
+    final index = currentState.items.indexWhere(
+      (item) => item.product.id == product.id,
+    );
+
+    if (index < 0) {
+      state = AsyncData(currentState.copyWith(isLoading: false));
+      return;
+    }
+
+    final items = [...currentState.items];
+    final currentItem = items[index];
+    final newQuantity = currentItem.quantity - 1;
+
+    if (newQuantity <= 0) {
+      final itemsUpdated = items
+          .where((item) => item.product.id != product.id)
+          .toList();
+      final summary = itemsUpdated.isEmpty
+          ? null
+          : sl<CalculateCartSummaryUsecase>()(itemsUpdated);
+
+      final result = await sl<RemoveProductFromCartUseCase>()(product.id);
+
+      result.fold(
+        (failure) {
+          state = AsyncError(failure, StackTrace.current);
+          throw failure;
+        },
+        (_) {
+          state = AsyncData(
+            currentState.copyWith(
+              items: itemsUpdated,
+              summary: summary,
+              isLoading: false,
+            ),
+          );
+        },
+      );
+      return;
+    }
+
+    items[index] = currentItem.copyWith(quantity: newQuantity);
+    final summary = sl<CalculateCartSummaryUsecase>()(items);
+
+    final result = await sl<AddProductToCartUseCase>()(product.id, newQuantity);
+
+    result.fold(
+      (failure) {
+        state = AsyncError(failure, StackTrace.current);
+        throw failure;
+      },
+      (_) {
+        state = AsyncData(
+          currentState.copyWith(
+            items: items,
+            summary: summary,
+            isLoading: false,
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> removeItem(int productId) async {
     final currentState = state.value ?? CartState(items: []);
     state = AsyncData(currentState.copyWith(isLoading: true));

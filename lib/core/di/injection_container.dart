@@ -73,14 +73,26 @@ Future<Database> _initDatabase() async {
   final database = await openDatabase(
     join(dbPath, 'commerce_cache.db'),
     onCreate: (db, version) async {
-      await db.execute(
-        'CREATE TABLE products(id INTEGER PRIMARY KEY, title TEXT, description TEXT, price REAL, thumbnail TEXT)',
-      );
+      await db.execute('''
+        CREATE TABLE products(
+          id INTEGER PRIMARY KEY,
+          title TEXT,
+          description TEXT,
+          price REAL,
+          thumbnail TEXT,
+          category TEXT,
+          shippingInformation TEXT,
+          warrantyInformation TEXT,
+          returnPolicy TEXT,
+          availabilityStatus TEXT,
+          rating REAL
+        )
+      ''');
       await db.execute(
         'CREATE TABLE cart_items(product_id INTEGER PRIMARY KEY, quantity INTEGER)',
       );
     },
-    version: 2,
+    version: 1,
   );
 
   return database;

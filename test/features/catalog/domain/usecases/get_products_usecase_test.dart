@@ -24,6 +24,12 @@ void main() {
       description: 'Description of product 1',
       price: 100.0,
       thumbnail: 'https://example.com/product1.jpg',
+      category: '',
+      shippingInformation: '',
+      warrantyInformation: '',
+      returnPolicy: '',
+      availabilityStatus: '',
+      rating: 0,
     ),
     Product(
       id: 2,
@@ -31,6 +37,12 @@ void main() {
       description: 'Description of product 2',
       price: 200.0,
       thumbnail: 'https://example.com/product2.jpg',
+      category: '',
+      shippingInformation: '',
+      warrantyInformation: '',
+      returnPolicy: '',
+      availabilityStatus: '',
+      rating: 0,
     ),
   ];
 

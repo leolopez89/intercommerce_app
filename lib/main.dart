@@ -20,7 +20,15 @@ class InterCommerceApp extends StatelessWidget {
       title: 'InterCommerce App',
       debugShowCheckedModeBanner: false,
       routerConfig: appRouter,
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.indigo,
+        secondaryHeaderColor: Colors.indigoAccent,
+        appBarTheme: const AppBarTheme(
+          foregroundColor: Colors.indigo,
+          backgroundColor: Colors.white,
+        ),
+      ),
     );
   }
 }

@@ -14,6 +14,12 @@ class ProductModel with _$ProductModel {
     required String description,
     required double price,
     required String thumbnail,
+    required String category,
+    required String shippingInformation,
+    required String warrantyInformation,
+    required String returnPolicy,
+    required String availabilityStatus,
+    required double rating,
   }) = _ProductModel;
 
   factory ProductModel.fromJson(Map<String, dynamic> json) =>
@@ -25,5 +31,11 @@ class ProductModel with _$ProductModel {
     description: description,
     price: price,
     thumbnail: thumbnail,
+    category: category,
+    shippingInformation: shippingInformation,
+    warrantyInformation: warrantyInformation,
+    returnPolicy: returnPolicy,
+    availabilityStatus: availabilityStatus,
+    rating: rating,
   );
 }

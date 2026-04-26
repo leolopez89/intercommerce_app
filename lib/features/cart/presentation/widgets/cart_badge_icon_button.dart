@@ -18,7 +18,10 @@ class CartBadgeIconButton extends ConsumerWidget {
           alignment: Alignment.center,
           children: [
             IconButton(
-              icon: const Icon(Icons.shopping_cart_outlined),
+              icon: const Icon(
+                Icons.shopping_cart_outlined,
+                color: Colors.black87,
+              ),
               onPressed: () => context.push('/cart'),
             ),
             if (count > 0)

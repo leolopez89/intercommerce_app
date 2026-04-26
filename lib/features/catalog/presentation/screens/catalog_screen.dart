@@ -39,12 +39,16 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     });
 
     final initialQuery = ref.read(catalogProvider).value?.query ?? '';
-    _searchController = TextEditingController(text: initialQuery);
+    _searchController = TextEditingController(text: initialQuery)
+      ..addListener(() {
+        setState(() {});
+      });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -63,12 +67,14 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 0.7,
+                  childAspectRatio: 0.6,
                   mainAxisSpacing: 10,
                   crossAxisSpacing: 10,
                 ),
                 delegate: SliverChildBuilderDelegate((context, index) {
-                  return ProductCard(product: catalogState.products[index]);
+                  return ProductCard(
+                    productId: catalogState.products[index].id,
+                  );
                 }, childCount: catalogState.products.length),
               ),
             ),
@@ -104,10 +110,28 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
           padding: const EdgeInsets.all(8.0),
           child: SearchBar(
             controller: _searchController,
-            hintText: 'Buscar productos...',
+            hintText: 'Search products...',
             onChanged: (value) =>
                 ref.read(catalogProvider.notifier).search(value),
-            leading: const Icon(Icons.search),
+            leading: const Icon(Icons.search, color: Colors.grey),
+            trailing: _searchController.text.isNotEmpty
+                ? [
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.grey),
+                      onPressed: () {
+                        _searchController.clear();
+                        ref.read(catalogProvider.notifier).search('');
+                      },
+                    ),
+                  ]
+                : null,
+            elevation: WidgetStateProperty.all(0),
+            shape: WidgetStateProperty.all(
+              const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            hintStyle: WidgetStateProperty.all(
+              const TextStyle(color: Colors.grey),
+            ),
           ),
         ),
       ),

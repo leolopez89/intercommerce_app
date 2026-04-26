@@ -1,8 +1,66 @@
-# intercommerce_app
+# InterCommerce App - MVP
 
-An e-commerce app
+Este es un MVP de una aplicación de E-commerce, desarrollada en Flutter siguiendo principios de Clean Architecture.
 
-## General Stucture
+## 🚀 Arquitectura y Patrones
+
+La aplicación está diseñada bajo el estándar de **Clean Architecture**, dividiendo el código en tres capas principales para garantizar el desacoplamiento y la testabilidad:
+
+- **Domain (Capa de Negocio):** Contiene las Entidades puras, las interfaces de los Repositorios y los Casos de Uso (Usecases). Aquí reside la lógica de cálculo del carrito (impuestos y totales) de forma agnóstica a la infraestructura.
+- **Data (Capa de Infraestructura):** Implementaciones de los repositorios, modelos (con **Freezed** para inmutabilidad) y fuentes de datos (Remote via **Dio** y Local via **SQLite**).
+- **Presentation (Capa de UI):** Implementada con **Riverpod** (usando Generadores) para la gestión de estados asíncronos y **GoRouter** para una navegación avanzada.
+
+## Instrucciones de Ejecución
+
+1. **Clonar el repositorio.**
+2. **Instalar dependencias:**
+
+   ```bash
+   flutter pub get
+   flutter run
+   ```
+
+3. **Ejecutar la aplicación:**
+
+   ```bash
+   flutter run
+   ```
+
+4. **Ejecutar las pruebas:**
+
+   ```bash
+   flutter test
+   ```
+
+## Supuestos Técnicos Asumidos
+
+Se asume que la API de DummyJSON es la única fuente de verdad para los datos remotos.
+
+La persistencia local del catálogo actúa como un mecanismo de "Cache-then-Network" para mejorar la experiencia offline.
+
+El IVA aplicado en el carrito es del 19% (basado en el contexto local del desarrollador).
+
+El feedback táctil se implementó mediante HapticFeedback.lightImpact() para interacciones críticas.
+
+---
+
+### Tecnologías Principales
+
+- **Estado:** Riverpod (AsyncNotifier)
+- **Navegación:** GoRouter
+- **Persistencia:** SQLite (sqflite)
+- **Networking:** Dio
+- **Diseño:** Material 3 con Slivers y Shimmer effects.
+
+### Gestión Centralizada de Errores
+
+Se implementó un sistema de gestión de errores basado en la capa `core`, donde:
+
+- Los errores de infraestructura (Dio, SQLite) se mapean a clases `Failure` de dominio.
+- Se utiliza un `Interceptor` en el cliente HTTP para capturar fallos de red globalmente.
+- La UI reacciona de forma reactiva mediante los estados `AsyncError` de Riverpod, permitiendo reintentos limpios del flujo de datos.
+
+## Estructura General
 
 ```txt
     lib/
@@ -15,92 +73,4 @@ An e-commerce app
     │   ├── product_detail/   # Módulo B
     │   └── cart/             # Módulo C
     └── main.dart
-```
-
-```txt
-lib/
-├── core/
-│   ├── errors/
-│   │   └── exceptions.dart
-│   ├── utils/
-│   │   └── constants.dart
-│   ├── theme/
-│   │   └── app_theme.dart
-│   └── di/
-│       └── injector.dart
-│
-├── features/
-│   ├── catalog/
-│   │   ├── data/
-│   │   │   ├── datasources/
-│   │   │   │   └── product_api.dart
-│   │   │   ├── repositories/
-│   │   │   │   └── product_repository_impl.dart   # implementación
-│   │   │   └── mappers/
-│   │   │       └── product_mapper.dart
-│   │   ├── domain/
-│   │   │   ├── entities/
-│   │   │   │   └── product.dart
-│   │   │   ├── repositories/
-│   │   │   │   └── product_repository.dart        # interface
-│   │   │   └── usecases/
-│   │   │       ├── get_products_paginated.dart
-│   │   │       ├── search_products.dart
-│   │   │       └── cache_products_offline.dart
-│   │   └── presentation/
-│   │       ├── providers/
-│   │       │   └── product_provider.dart          # provider Riverpod
-│   │       ├── pages/
-│   │       │   └── catalog_page.dart
-│   │       └── widgets/
-│   │           ├── product_card.dart
-│   │           └── shimmer_loader.dart
-│   │
-│   ├── product_detail/
-│   │   ├── data/
-│   │   │   └── product_detail_api.dart
-│   │   ├── domain/
-│   │   │   ├── entities/
-│   │   │   │   └── product_detail.dart
-│   │   │   ├── repositories/
-│   │   │   │   └── product_detail_repository.dart
-│   │   │   └── usecases/
-│   │   │       ├── get_product_detail.dart
-│   │   │       └── add_product_to_cart.dart
-│   │   └── presentation/
-│   │       ├── providers/
-│   │       │   └── product_detail_provider.dart
-│   │       ├── pages/
-│   │       │   └── product_detail_page.dart
-│   │       └── widgets/
-│   │           └── product_detail_view.dart
-│   │
-│   └── cart/
-│       ├── data/
-│       │   ├── datasources/
-│       │   │   └── cart_db.dart
-│       │   ├── repositories/
-│       │   │   └── cart_repository_impl.dart
-│       │   └── mappers/
-│       │       └── cart_mapper.dart
-│       ├── domain/
-│       │   ├── entities/
-│       │   │   └── cart_item.dart
-│       │   ├── repositories/
-│       │   │   └── cart_repository.dart
-│       │   └── usecases/
-│       │       ├── add_product_to_cart.dart
-│       │       ├── remove_product_from_cart.dart
-│       │       ├── calculate_cart_total.dart
-│       │       ├── persist_cart.dart
-│       │       └── load_cart.dart
-│       └── presentation/
-│           ├── providers/
-│           │   └── cart_provider.dart
-│           ├── pages/
-│           │   └── cart_page.dart
-│           └── widgets/
-│               └── cart_item_tile.dart
-│
-└── main.dart
 ```

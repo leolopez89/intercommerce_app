@@ -1,9 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intercommerce_app/features/cart/domain/entities/cart_summary.dart';
 import 'package:intercommerce_app/features/cart/presentation/providers/cart_provider.dart';
-import 'package:intercommerce_app/features/catalog/presentation/widgets/product_shimmer_card.dart';
+import 'package:intercommerce_app/features/cart/presentation/widgets/cart_item_card.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
@@ -13,41 +12,43 @@ class CartScreen extends ConsumerWidget {
     final cartAsync = ref.watch(cartProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mi Carrito')),
+      appBar: AppBar(title: const Text('Cart')),
       body: cartAsync.when(
         data: (state) => state.items.isEmpty
-            ? const Center(child: Text('El carrito está vacío'))
+            ? const Center(child: Text('The cart is empty'))
             : Column(
                 children: [
                   Expanded(
                     child: ListView.builder(
-                      itemCount: state.items.length,
+                      itemCount: state.items.length + 1,
                       itemBuilder: (context, index) {
-                        final item = state.items[index];
-                        return ListTile(
-                          leading: CachedNetworkImage(
-                            imageUrl: item.product.thumbnail,
-                            placeholder: (context, url) =>
-                                const ProductShimmerCard(),
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.broken_image),
-                            fit: BoxFit.cover,
-                            width: 50,
-                          ),
-                          title: Text(item.product.title),
-                          subtitle: Text('Cantidad: ${item.quantity}'),
-                          trailing: Text(
-                            '\$${item.totalPrice.toStringAsFixed(2)}',
-                          ),
-                          onLongPress: () => ref
-                              .read(cartProvider.notifier)
-                              .removeItem(item.product.id),
-                        );
+                        if (index == 0) {
+                          return Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Your Products',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  '${state.items.length} ${state.items.length == 1 ? 'product' : 'products'}',
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        final item = state.items[index - 1];
+                        return CartItemCard(productId: item.product.id);
                       },
                     ),
                   ),
                   if (state.summary != null)
-                    _buildSummaryCard(context, state.summary!),
+                    _buildSummaryCard(context, state.summary!, ref),
                 ],
               ),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -56,43 +57,57 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryCard(BuildContext context, CartSummary summary) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _RowTotal(label: 'Subtotal', value: summary.subtotal),
-            _RowTotal(label: 'IVA (19%)', value: summary.tax),
-            const Divider(),
-            _RowTotal(label: 'Total', value: summary.total, isBold: true),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-                backgroundColor: Colors.indigo,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () {
-                /* Lógica de Checkout */
-              },
-              child: const Text('FINALIZAR COMPRA'),
+  Widget _buildSummaryCard(
+    BuildContext context,
+    CartSummary summary,
+    WidgetRef ref,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        border: Border(top: BorderSide(color: Colors.grey.shade300)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _ColumnTotal(label: 'Subtotal', value: summary.subtotal),
+              _ColumnTotal(label: 'Tax (19%)', value: summary.tax),
+              _ColumnTotal(label: 'Total', value: summary.total, isBold: true),
+            ],
+          ),
+          SizedBox(height: 16),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+              backgroundColor: Colors.indigo,
+              foregroundColor: Colors.white,
             ),
-          ],
-        ),
+            onPressed: () {
+              ref.read(cartProvider.notifier).clearCart();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Thank you for your purchase!'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+            child: const Text('CHECKOUT'),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _RowTotal extends StatelessWidget {
+class _ColumnTotal extends StatelessWidget {
   final String label;
   final double value;
   final bool isBold;
 
-  const _RowTotal({
+  const _ColumnTotal({
     required this.label,
     required this.value,
     this.isBold = false,
@@ -101,15 +116,20 @@ class _RowTotal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = TextStyle(
-      fontSize: isBold ? 18 : 14,
+      fontSize: isBold ? 20 : 16,
       fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+      color: isBold ? Colors.indigo : Colors.black87,
     );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(label, style: style),
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(fontSize: 12, color: Colors.black54),
+          ),
           Text('\$${value.toStringAsFixed(2)}', style: style),
         ],
       ),
