@@ -18,14 +18,22 @@ class Catalog extends _$Catalog {
   Future<CatalogState> build() async {
     ref.onDispose(() => _debounce?.cancel());
 
-    final products = await _fetchProducts(query: '', skip: 0);
-    return CatalogState(products: products);
+    try {
+      final products = await _fetchProducts(query: '', skip: 0);
+      return CatalogState(
+        products: products,
+        hasMore: products.length >= _limit,
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> fetchNextPage() async {
-    final currentState = state.value ?? CatalogState();
+    final currentState = state.asData?.value;
 
-    if (currentState.isFetching ||
+    if (currentState == null ||
+        currentState.isFetching ||
         !currentState.hasMore ||
         currentState.query.isNotEmpty) {
       return;
@@ -55,7 +63,12 @@ class Catalog extends _$Catalog {
   }
 
   Future<void> search(String query) async {
-    final currentState = state.value ?? CatalogState();
+    final currentState = state.asData?.value ?? CatalogState();
+
+    if (query == currentState.query && currentState.products.isEmpty) {
+      ref.invalidateSelf();
+      return;
+    }
 
     if (currentState.query == query) return;
 

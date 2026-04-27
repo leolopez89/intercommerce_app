@@ -22,7 +22,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      final catalogState = ref.read(catalogProvider).value;
+      final catalogState = ref.read(catalogProvider).asData?.value;
 
       if (catalogState == null) return;
 
@@ -38,7 +38,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
       }
     });
 
-    final initialQuery = ref.read(catalogProvider).value?.query ?? '';
+    final initialQuery = ref.read(catalogProvider).asData?.value.query ?? '';
     _searchController = TextEditingController(text: initialQuery)
       ..addListener(() {
         setState(() {});
@@ -81,19 +81,38 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
             loading: () => const SliverFillRemaining(child: ProductShimmer()),
             error: (err, _) => SliverFillRemaining(
               child: ErrorMessage(
-                error: err,
+                error: err is AsyncError ? err.error : err,
                 onRetry: () => ref
                     .read(catalogProvider.notifier)
                     .search(_searchController.text),
               ),
             ),
           ),
-          if (catalogAsync.value?.hasMore == true)
-            const PaginationShimmerRow(
-              crossAxisSpacing: 10,
-              horizontalPadding: 16,
-              aspectRatio: 0.7,
-            ),
+          catalogAsync.maybeWhen(
+            orElse: () => const SliverToBoxAdapter(),
+            data: (catalogState) {
+              if (catalogState.products.isEmpty) {
+                return const SliverFillRemaining(
+                  child: Center(child: Text('No products to show.')),
+                );
+              }
+              return const SliverToBoxAdapter();
+            },
+          ),
+          catalogAsync.maybeWhen(
+            orElse: () => const SliverToBoxAdapter(),
+            data: (catalogState) {
+              if (catalogState.hasMore == true) {
+                return const PaginationShimmerRow(
+                  crossAxisSpacing: 10,
+                  horizontalPadding: 16,
+                  aspectRatio: 0.7,
+                );
+              }
+
+              return const SliverToBoxAdapter();
+            },
+          ),
         ],
       ),
     );

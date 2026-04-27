@@ -39,7 +39,7 @@ class ProductRepositoryImpl implements ProductRepository {
         return Right(localProducts.map((m) => m.toEntity()).toList());
       }
 
-      return Right([]);
+      return Left(ConnectionFailure());
     } on Exception {
       return Left(ServerFailure());
     }

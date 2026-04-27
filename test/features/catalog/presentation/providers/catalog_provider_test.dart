@@ -72,9 +72,26 @@ void main() {
     test(
       'fetchNextPage should add new products to the existing state',
       () async {
+        final initialProducts = List.generate(
+          10,
+          (index) => Product(
+            id: index + 1,
+            title: 'Product ${index + 1}',
+            price: 20.0 + index,
+            description: '',
+            thumbnail: '',
+            category: '',
+            shippingInformation: '',
+            warrantyInformation: '',
+            returnPolicy: '',
+            availabilityStatus: '',
+            rating: 0,
+          ),
+        );
+
         final nextProducts = [
           Product(
-            id: 2,
+            id: 11,
             title: 'Mouse',
             price: 20.0,
             description: '',
@@ -90,7 +107,7 @@ void main() {
 
         when(
           () => mockGetProducts(limit: 10, skip: 0),
-        ).thenAnswer((_) async => Right(tProducts));
+        ).thenAnswer((_) async => Right(initialProducts));
         when(
           () => mockGetProducts(limit: 10, skip: 10),
         ).thenAnswer((_) async => Right(nextProducts));
@@ -100,9 +117,9 @@ void main() {
 
         await notifier.fetchNextPage();
 
-        final finalState = container.read(catalogProvider).value;
-        expect(finalState!.products.length, 2);
-        expect(finalState.products, [...tProducts, ...nextProducts]);
+        final finalState = container.read(catalogProvider).asData!.value;
+        expect(finalState.products.length, 11);
+        expect(finalState.products, [...initialProducts, ...nextProducts]);
         expect(finalState.skip, 10);
       },
     );
@@ -150,13 +167,61 @@ void main() {
         ),
       ).thenAnswer((_) async => Left(tFailure));
 
+      container.listen(catalogProvider, (_, _) {});
+
       try {
         await container.read(catalogProvider.future);
       } catch (_) {}
 
+      await Future.delayed(const Duration(milliseconds: 1000));
+
       final currentState = container.read(catalogProvider);
-      expect(currentState is AsyncError, true);
-      expect(currentState.error, tFailure);
+      expect(currentState, isA<AsyncError>());
+      if (currentState is AsyncError) {
+        expect(currentState.error, tFailure);
+      }
+    });
+
+    test('search retry should recover after previous failure', () async {
+      final tFailure = ConnectionFailure();
+      when(
+        () => mockGetProducts(
+          limit: any(named: 'limit'),
+          skip: any(named: 'skip'),
+        ),
+      ).thenAnswer((_) async => Right(tProducts));
+      when(
+        () => mockSearchProducts('Laptop'),
+      ).thenAnswer((_) async => Left(tFailure));
+
+      final notifier = container.read(catalogProvider.notifier);
+      container.listen(catalogProvider, (_, _) {});
+      await container.read(catalogProvider.future);
+
+      notifier.search('Laptop');
+      await Future.delayed(const Duration(milliseconds: 1000));
+
+      final failedState = container.read(catalogProvider);
+      expect(failedState, isA<AsyncError>());
+      if (failedState is AsyncError) {
+        expect(failedState.error, tFailure);
+      }
+
+      when(
+        () => mockSearchProducts('Laptop'),
+      ).thenAnswer((_) async => Right(tProducts));
+
+      notifier.search('Laptop');
+      await Future.delayed(const Duration(milliseconds: 1000));
+
+      final recoveredState = container.read(catalogProvider);
+      recoveredState.maybeWhen(
+        data: (catalogState) {
+          expect(catalogState.products, tProducts);
+          expect(catalogState.query, 'Laptop');
+        },
+        orElse: () => fail('Expected AsyncData after retry'),
+      );
     });
   });
 }
